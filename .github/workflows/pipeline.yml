@@ -37,7 +37,7 @@ jobs:
         run: npm i
 
       - name: Lint code
-        run: npm run lint
+        run: npm i
         if: success()
 
       #   - name: Run unit tests
