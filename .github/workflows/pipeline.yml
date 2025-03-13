@@ -37,21 +37,16 @@ jobs:
       - name: Starting pre-build checks
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Pre-build checks started for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Pre-build checks started for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Starting pre-build checks: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -83,21 +78,16 @@ jobs:
       - name: Finished pre-build checks
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Pre-build checks finished for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Pre-build checks ended for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Finished pre-build checks: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -116,21 +106,16 @@ jobs:
         uses: slackapi/slack-github-action@v2.0.0
 
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Started deploying to Fly.io development for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Started deploying to Fly.io development for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Starting to build for Fly.io development: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -148,21 +133,16 @@ jobs:
       - name: Finished deploying to Fly.io development
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Finished deploying to Fly.io development for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Finished deploying to Fly.io development for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Finished deploying to Fly.io development: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -175,21 +155,16 @@ jobs:
       - name: Creating PR for Staging
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Creating PR for staging for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Creating PR for Staging for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Creating PR for Staging: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -212,21 +187,16 @@ jobs:
       - name: Created PR for Staging
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Created PR for staging for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Created PR for staging for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Created PR for Staging: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -243,21 +213,16 @@ jobs:
       - name: Starting to deploy for Fly.io staging
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Starting to build for Fly.io staging for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Starting to build for Fly.io staging for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Started deploying to Fly.io staging: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -278,21 +243,18 @@ jobs:
           fly deploy -c fly-staging.toml -a asf-integration-layer-staging
 
       - name: Finished deploying to Fly.io staging
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Finished deploying to Fly.io staging for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Finished deploying to Fly.io staging for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Finished deploying to Fly.io staging: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -301,24 +263,19 @@ jobs:
     if: github.ref == 'refs/heads/staging' && success()
     runs-on: ubuntu-latest
     steps:
-      - name: Created PR for Production
+      - name: Creating PR for Production
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Created PR for production for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Created PR for production for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Creating PR for Production: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -341,21 +298,16 @@ jobs:
       - name: Created PR for Production
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Created PR for production for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Created PR for production for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Created PR for production: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -372,21 +324,16 @@ jobs:
       - name: Started deploying to Fly.io production
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Started deploying to Fly.io production for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Started deploying to Fly.io production for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Started deploying to Fly.io production: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -409,20 +356,15 @@ jobs:
       - name: Finished deploying to Fly.io production
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
-          webhook-type: webhook-trigger
+          method: chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
-            {
-              "text": "Finished deploying to Fly.io production for ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": ":rocket: Finished deploying to Fly.io production for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
-                  }
-                }
-              ]
-            }
+            channel: ${{ secrets.SLACK_CHANNEL_ID }}
+            text: "GitHub Action build result: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
+            blocks:
+              - type: "section"
+              text:
+                type: "mrkdwn"
+                text: "Finished deploying to Fly.io production: ${{ job.status }}\n${{ github.event.pull_request.html_url || github.event.head_commit.url }}"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
