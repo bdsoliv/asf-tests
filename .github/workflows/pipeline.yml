@@ -1,0 +1,161 @@
+name: ASF API CI/CD Pipeline
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  push:
+    branches: [development, staging]
+  pull_request:
+    branches: [development, staging, master]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        default: "development"
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Lint code
+        run: npm run lint
+        if: success()
+
+      #   - name: Run unit tests
+      #     run: npm run test
+
+      #   - name: Check code coverage
+      #     run: npm run coverage
+
+      #   - name: Security scan
+      #     run: npm run security-scan
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            dist/
+            coverage/
+        if: success()
+
+  deploy_to_development:
+    needs: build_and_test
+    if: github.ref == 'refs/heads/development' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy development branch to Fly.io
+        run: |
+          export FLYCTL_INSTALL="/home/runner/.fly"
+          curl -L https://fly.io/install.sh | sh
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          fly deploy -c fly-dev.toml -a asf-integration-layer-dev
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_AUTH_TOKEN }}
+
+  request_staging_deployment:
+    needs: deploy_to_development
+    if: github.ref == 'refs/heads/development' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create deployment request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Deploy to Staging',
+              body: 'This PR was automatically created by the GitHub Action workflow. Merge to deploy to staging.',
+              head: 'dev',
+              base: 'staging'
+            });
+            console.log(`Created PR #${pr.number}`);
+
+  deploy_to_staging:
+    if: github.ref == 'refs/heads/staging' && success()
+    needs: [build_and_test, request_staging_deployment]
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.atlanticseafood.app
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment"
+          # Your staging deployment script here
+
+  request_production_deployment:
+    needs: deploy_to_staging
+    if: github.ref == 'refs/heads/staging' && success()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create deployment request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Deploy to Production',
+              body: 'This PR was automatically created by the GitHub Action workflow. Merge to deploy to production.',
+              head: 'staging',
+              base: 'master'
+            });
+            console.log(`Created PR #${pr.number}`);
+
+  deploy_to_production:
+    if: github.ref == 'refs/heads/master' && success()
+    needs: [build_and_test, request_production_deployment]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://crm-web-nine.vercel.app
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm i
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment"
+          # Your production deployment script here
