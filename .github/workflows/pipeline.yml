@@ -6,7 +6,7 @@ permissions:
 
 on:
   push:
-    branches: [development, staging]
+    branches: [development, staging, master]
   pull_request:
     branches: [development, staging, master]
   workflow_dispatch:
@@ -19,7 +19,7 @@ on:
         options:
           - development
           - staging
-          - master
+          - production
 
 jobs:
   build_and_test:
@@ -62,6 +62,9 @@ jobs:
     needs: build_and_test
     if: github.ref == 'refs/heads/development' && success()
     runs-on: ubuntu-latest
+    environment:
+      name: development
+      url: https://development.atlanticseafood.app
     steps:
       - uses: actions/checkout@v3
       - name: Deploy development branch to Fly.io
