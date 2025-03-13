@@ -92,7 +92,7 @@ jobs:
               repo: context.repo.repo,
               title: 'Deploy to Staging',
               body: 'This PR was automatically created by the GitHub Action workflow. Merge to deploy to staging.',
-              head: 'dev',
+              head: 'development',
               base: 'staging'
             });
             console.log(`Created PR #${pr.number}`);
