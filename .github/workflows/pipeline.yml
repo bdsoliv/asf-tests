@@ -19,7 +19,7 @@ on:
         options:
           - development
           - staging
-          - production
+          - master
 
 jobs:
   build_and_test:
