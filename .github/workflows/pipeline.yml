@@ -22,16 +22,36 @@ on:
           - production
 
 jobs:
-  build_and_test:
+  test_and_security_scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: slackapi/slack-github-action@v1.24.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
           cache: "npm"
+
+      - name: Starting pre-build checks
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Pre-build checks started for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Pre-build checks started for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Install dependencies
         run: npm i
@@ -49,42 +69,119 @@ jobs:
       #   - name: Security scan
       #     run: npm run security-scan
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: build-artifacts
+      #     path: |
+      #       dist/
+      #       coverage/
+      #   if: success()
+
+      - name: Finished pre-build checks
+        uses: slackapi/slack-github-action@v1.24.0
         with:
-          name: build-artifacts
-          path: |
-            dist/
-            coverage/
-        if: success()
+          payload: |
+            {
+              "text": "Pre-build checks finished for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Pre-build checks ended for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   deploy_to_development:
-    needs: build_and_test
+    needs: test_and_security_scan
     if: github.ref == 'refs/heads/development' && success()
     runs-on: ubuntu-latest
     environment:
       name: development
       url: https://development.atlanticseafood.app
     steps:
+      - uses: slackapi/slack-github-action@v1.24.0
       - uses: actions/checkout@v3
-      - name: Deploy development branch to Fly.io
-        # run: |
-        #   export FLYCTL_INSTALL="/home/runner/.fly"
-        #   curl -L https://fly.io/install.sh | sh
-        #   export PATH="$FLYCTL_INSTALL/bin:$PATH"
-        #   echo "PATH=$PATH" >> $GITHUB_ENV
-        #   fly deploy -c fly-dev.toml -a asf-integration-layer-dev
+
+      - name: Starting to build for Fly.io development
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Started deploying to Fly.io development for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Started deploying to Fly.io development for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Deploy development Fly.io
         run: |
-          echo "Deploying to development environment"
-          # Your development deployment script here
+          export FLYCTL_INSTALL="/home/runner/.fly"
+          curl -L https://fly.io/install.sh | sh
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          fly deploy -c fly-dev.toml -a asf-integration-layer-dev
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_AUTH_TOKEN }}
+        if: success()
+
+      - name: Finished deploying to Fly.io development
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Finished deploying to Fly.io development for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Finished deploying to Fly.io development for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   request_staging_deployment:
     needs: deploy_to_development
     if: github.ref == 'refs/heads/development' && success()
     runs-on: ubuntu-latest
+
     steps:
+      - name: Creating PR for Staging
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Creating PR for staging for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Creating PR for Staging for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
       - name: Create deployment request
         uses: actions/github-script@v6
         with:
@@ -99,16 +196,55 @@ jobs:
               base: 'staging'
             });
             console.log(`Created PR #${pr.number}`);
+            if: success()
+
+      - name: Created PR for Staging
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Created PR for staging for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Created PR for staging for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   deploy_to_staging:
     if: github.ref == 'refs/heads/staging' && success()
-    needs: build_and_test
+    needs: test_and_security_scan
     runs-on: ubuntu-latest
     environment:
       name: staging
       url: https://staging.atlanticseafood.app
     steps:
       - uses: actions/checkout@v3
+
+      - name: Starting to deploy for Fly.io staging
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Starting to build for Fly.io staging for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Starting to build for Fly.io staging for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -118,17 +254,58 @@ jobs:
       - name: Install dependencies
         run: npm i
 
-      - name: Deploy to staging
+      - name: Deploy to Fly.io Staging
         run: |
-          echo "Deploying to staging environment"
-          # Your staging deployment script here
+          export FLYCTL_INSTALL="/home/runner/.fly"
+          curl -L https://fly.io/install.sh | sh
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          fly deploy -c fly-staging.toml -a asf-integration-layer-staging
+
+      - name: Finished deploying to Fly.io staging
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Finished deploying to Fly.io staging for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Finished deploying to Fly.io staging for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   request_production_deployment:
     needs: deploy_to_staging
     if: github.ref == 'refs/heads/staging' && success()
     runs-on: ubuntu-latest
     steps:
-      - name: Create deployment request
+      - name: Created PR for Production
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Created PR for production for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Created PR for production for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Create deployment pull request
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -142,16 +319,55 @@ jobs:
               base: 'master'
             });
             console.log(`Created PR #${pr.number}`);
+            if: success()
+
+      - name: Created PR for Production
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Created PR for production for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Created PR for production for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   deploy_to_production:
     if: github.ref == 'refs/heads/master' && success()
-    needs: build_and_test
+    needs: test_and_security_scan
     runs-on: ubuntu-latest
     environment:
       name: production
       url: https://crm-web-nine.vercel.app
     steps:
       - uses: actions/checkout@v3
+
+      - name: Started deploying to Fly.io production
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Started deploying to Fly.io production for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Started deploying to Fly.io production for *${{ github.repository }}*\nBranch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -163,5 +379,27 @@ jobs:
 
       - name: Deploy to production
         run: |
-          echo "Deploying to production environment"
-          # Your production deployment script here
+          export FLYCTL_INSTALL="/home/runner/.fly"
+          curl -L https://fly.io/install.sh | sh
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          fly deploy -c fly.toml -a asf-integration-layer
+
+      - name: Finished deploying to Fly.io production
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "Finished deploying to Fly.io production for ${{ github.repository }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: Finished deploying to Fly.io production for *${{ github.repository }}*\n From branch: `${{ github.ref_name }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
