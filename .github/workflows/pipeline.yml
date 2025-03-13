@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: slackapi/slack-github-action@v1.24.0
+      - uses: slackapi/slack-github-action@v2.0.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -35,8 +35,10 @@ jobs:
           cache: "npm"
 
       - name: Starting pre-build checks
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Pre-build checks started for ${{ github.repository }}",
@@ -79,8 +81,10 @@ jobs:
       #   if: success()
 
       - name: Finished pre-build checks
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Pre-build checks finished for ${{ github.repository }}",
@@ -109,8 +113,11 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Starting to build for Fly.io development
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
+
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Started deploying to Fly.io development for ${{ github.repository }}",
@@ -139,8 +146,10 @@ jobs:
         if: success()
 
       - name: Finished deploying to Fly.io development
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Finished deploying to Fly.io development for ${{ github.repository }}",
@@ -164,8 +173,10 @@ jobs:
 
     steps:
       - name: Creating PR for Staging
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Creating PR for staging for ${{ github.repository }}",
@@ -199,8 +210,10 @@ jobs:
             if: success()
 
       - name: Created PR for Staging
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Created PR for staging for ${{ github.repository }}",
@@ -228,8 +241,10 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Starting to deploy for Fly.io staging
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Starting to build for Fly.io staging for ${{ github.repository }}",
@@ -287,8 +302,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Created PR for Production
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Created PR for production for ${{ github.repository }}",
@@ -322,8 +339,10 @@ jobs:
             if: success()
 
       - name: Created PR for Production
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Created PR for production for ${{ github.repository }}",
@@ -351,8 +370,10 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Started deploying to Fly.io production
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Started deploying to Fly.io production for ${{ github.repository }}",
@@ -386,8 +407,10 @@ jobs:
           fly deploy -c fly.toml -a asf-integration-layer
 
       - name: Finished deploying to Fly.io production
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@v2.0.0
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
             {
               "text": "Finished deploying to Fly.io production for ${{ github.repository }}",
