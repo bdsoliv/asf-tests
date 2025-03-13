@@ -36,19 +36,13 @@ jobs:
       - name: Starting pre-build checks
         uses: slackapi/slack-github-action@v2.0.0
         with:
-          method: chat.postMessage
-          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: webhook-trigger
           payload: |
-            channel: ${{ secrets.SLACK_CHANNEL_ID }}
-            text: "GitHub Action build result"
-            blocks:
-              - type: "section"
-              text:
-                type: "mrkdwn"
-                text: "Starting pre-build checks!"
+            status: "${{ job.status }}"
+            option: "false"
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Install dependencies
         run: npm i
